@@ -1,86 +1,182 @@
-# HR-Analytics-Employee-Attrition
+# HR Analytics – Predicting Employee Attrition (IBM HR Dataset)
 
-# HR Analytics - Predicting Employee Attrition
-
-## 🔍 Problem Statement
-The goal is to analyze HR data and build a predictive model that identifies whether an employee is likely to leave the company (Attrition), based on various personal and professional factors.
-
----
-
-## 📊 Dataset Overview
-- **Dataset Name:** WA_Fn-UseC_-HR-Employee-Attrition.csv  
-- **Rows:** 1470  
-- **Target Variable:** `Attrition` (Yes/No)  
-- **Features:** Age, BusinessTravel, JobRole, MonthlyIncome, etc.
+**Author:** Ravi Ojha  
+**Internship:** Elevate Labs – Project Phase  
+**Goal:** Use historical HR data to predict whether an employee will leave (`Attrition`) and identify the factors driving attrition so HR can act early.
 
 ---
 
-## 🛠️ Tools & Technologies
-- Python (Pandas, NumPy)
-- Data Visualization: Matplotlib, Seaborn
-- Machine Learning: scikit-learn
-- Class Imbalance Handling: SMOTE
-- Model: Logistic Regression
+## 📊 Dataset Details
+**File:** `WA_Fn-UseC_-HR-Employee-Attrition.csv`  
+**Rows:** 1470 employees  
+**Target Column:** `Attrition` (Yes / No)
+
+### ✅ Main Columns (after dropping constants/IDs)
+**Employee & Personal**
+- `Age`
+- `Gender`
+- `MaritalStatus`
+- `DistanceFromHome`
+
+**Education & Experience**
+- `Education` (1–5 scale)
+- `EducationField`
+- `TotalWorkingYears`
+- `NumCompaniesWorked`
+- `YearsAtCompany`
+- `YearsInCurrentRole`
+- `YearsSinceLastPromotion`
+- `YearsWithCurrManager`
+- `TrainingTimesLastYear`
+
+**Job & Work Conditions**
+- `Department`
+- `JobRole`
+- `JobLevel`
+- `JobInvolvement`
+- `BusinessTravel`
+- `OverTime` (Yes/No)
+
+**Compensation & Performance**
+- `MonthlyIncome`
+- `MonthlyRate`
+- `DailyRate`
+- `HourlyRate`
+- `PercentSalaryHike`
+- `StockOptionLevel`
+- `PerformanceRating`
+
+**Satisfaction Scores (survey-type 1–4)**
+- `JobSatisfaction`
+- `EnvironmentSatisfaction`
+- `RelationshipSatisfaction`
+- `WorkLifeBalance`
 
 ---
 
-## ✅ Steps Performed
+## 🧹 Columns Dropped During Cleaning
+These had zero variance or no analytical value:
+- `EmployeeNumber` (unique ID)
+- `EmployeeCount` (constant)
+- `Over18` (constant “Y”)
+- `StandardHours` (constant)
+
+---
+
+## 🛠️ Tech Stack
+- **Python:** pandas, numpy
+- **Viz:** matplotlib, seaborn
+- **ML:** scikit-learn (LogisticRegression)
+- **Imbalance:** imblearn.SMOTE
+- **Explainability:** SHAP
+- **Dashboard:** Power BI
+- **Report:** PDF (Attrition prevention suggestions)
+
+---
+
+## ✅ Project Workflow
 
 ### 1. Data Cleaning
-- Dropped unnecessary columns: `EmployeeNumber`, `Over18`, `StandardHours`, etc.
-- Checked for nulls, duplicates, and fixed data types
+- Dropped constant / ID columns.
+- Checked datatypes & missing values (none critical).
+- Basic sanity checks on numeric ranges.
 
 ### 2. EDA (Exploratory Data Analysis)
-- Analyzed attrition across JobRole, MaritalStatus, OverTime, etc.
-- Visualized distributions and outliers
-- Detected skewed features and outliers using boxplots
+- Attrition rate overall (% Yes vs No).
+- Categorical breakdowns: Department, JobRole, BusinessTravel, OverTime, MaritalStatus, Gender.
+- Numeric distributions: MonthlyIncome, Age, DistanceFromHome.
+- Satisfaction scores vs Attrition.
+- Correlation heatmap (numeric features).
 
-### 3. Feature Engineering
-- OneHotEncoding on categorical variables
-- LabelEncoding on target (`Attrition`)
-- Outlier capping using IQR (for MonthlyIncome, TrainingTimesLastYear, etc.)
+### 3. Outlier Handling (Selective)
+- IQR capping applied to `MonthlyIncome` (and other skewed fields where required & documented).
 
-### 4. Scaling
-- Applied StandardScaler to numerical columns
+### 4. Encoding
+- **OneHotEncoder**: `BusinessTravel`, `Department`, `EducationField`, `Gender`, `JobRole`, `MaritalStatus`, `OverTime`
+- **LabelEncoder**: `Attrition` (Yes→1, No→0)
 
-### 5. Class Imbalance Solution
-- Applied **SMOTE** to oversample the minority class (`Attrition = Yes`) in the training data
+### 5. Scaling
+- **StandardScaler** on numerical features.
+- Encoded features also scaled (model-friendly, consistent magnitude).
 
-### 6. Model Training & Evaluation
-- Trained **Logistic Regression** on SMOTE-balanced data
-- Evaluated using Accuracy, Confusion Matrix, Classification Report
+### 6. Train/Test Split
+- 80/20 split (`random_state=42`).
+
+### 7. Class Imbalance Handling
+- Minority class (`Attrition=Yes`) was under-represented.
+- Applied **SMOTE** on training data only (no leakage).
+
+### 8. Model Training
+- Logistic Regression (`max_iter=1000`).
+- Compared: baseline, class_weight, SMOTE.
+- Final chosen: Logistic Regression trained on SMOTE-balanced data (best balance of recall + interpretability).
+
+### 9. Model Evaluation
+- Accuracy, Confusion Matrix, Classification Report.
+- Focus on Recall for Attrition (business-critical).
+
+### 10. SHAP Explainability
+- LinearExplainer used on trained Logistic model.
+- Global & per-employee feature impact.
+- Key attrition drivers identified (see below).
 
 ---
 
-## 📈 Final Model Results
+## 📈 Model Performance (Test Set)
 
-| Metric   | Value       |
-|----------|-------------|
-| Accuracy | ✅ 76.19%  
-| Recall (Yes) | ✅ Improved due to SMOTE  
-| Model    | Logistic Regression  
-| Test Size | 20%  
+| Metric | Score |
+|--------|-------|
+| Accuracy | **76.19%** |
+| Attrition Recall | Improved vs baseline (due to SMOTE) |
+| Model | Logistic Regression |
 
----
-
-## 🧠 Key Learnings
-- How to handle **class imbalance** using SMOTE  
-- Improved understanding of **Logistic Regression**  
-- Importance of proper **EDA and preprocessing**  
-- Visualizing insights using heatmaps, boxplots, and countplots
+> Full classification report and confusion matrix in notebook.
 
 ---
 
-## 📌 Confusion Matrix
-(Confusion matrix image can be added here if saved as `model_output.png`)
+## 🧠 SHAP Insights (Feature Impact)
+Top features increasing attrition probability (in our model):
+- **OverTime = Yes**
+- **BusinessTravel = Travel_Frequently**
+- **Lower MonthlyIncome**
+- **Lower JobSatisfaction / EnvironmentSatisfaction**
+- **Lower JobLevel**
 
-```python
-# Sample Plot Code
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
+Features reducing attrition risk:
+- **Higher JobLevel**
+- **Better WorkLifeBalance**
+- **Longer tenure with current manager**
 
-cm = confusion_matrix(y_test, y_pred)
-sns.heatmap(cm, annot=True, fmt='d')
-plt.title("Confusion Matrix")
-plt.show()
+(*See notebook SHAP plots for details.*)
+
+---
+
+## 📊 Power BI Dashboard
+Interactive visual summary including:
+- Overall Attrition %
+- Department & JobRole attrition
+- OverTime & BusinessTravel filters
+- Income band comparison
+
+> File: `HR_Attrition_Dashboard.pbix`
+
+---
+
+## 📄 Attrition Prevention Recommendations (PDF)
+Data-backed actions to reduce attrition:
+- Reduce excessive overtime load
+- Revisit pay structure for low JobLevel bands
+- Limit frequent business travel or provide recovery allowances
+- Engagement program for low satisfaction teams
+- Hybrid work for long commutes
+
+> File: `Attrition_Prevention_Suggestions.pdf`
+
+---
+
+## 🚀 Run Locally
+
+### Clone
+```bash
+git clone https://github.com/<your-username>/HR-Analytics-Employee-Attrition.git
+cd HR-Analytics-Employee-Attrition
