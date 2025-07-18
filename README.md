@@ -174,9 +174,4 @@ Data-backed actions to reduce attrition:
 
 ---
 
-## 🚀 Run Locally
 
-### Clone
-```bash
-git clone https://github.com/<your-username>/HR-Analytics-Employee-Attrition.git
-cd HR-Analytics-Employee-Attrition
